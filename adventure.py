@@ -205,29 +205,29 @@ while True:
                     spell_choice = int(input("Enter your choice: "))
                     spell = current_area["shop"]["spells"][spell_choice-1]
                     if player["gold"] >= spell["price"]:
-                    player["gold"] -= spell["price"]
-                    player["spells"].append(spell)
-                    print(f"You bought {spell['name']}!")
-                    print(f"You have {len(player['spells'])} spells: ")
-                    for s in player['spells']:
-                        print(f"{s['name']} (mana: {s['mana']})")
+                       player["gold"] -= spell["price"]
+                       player["spells"].append(spell)
+                       print(f"You bought {spell['name']}!")
+                       print(f"You have {len(player['spells'])} spells: ")
+                       for s in player['spells']:
+                          print(f"{s['name']} (mana: {s['mana']})")
+                    else:
+                        print("Not enough gold!")
+                elif shop_choice == "3":
+                    # Leave shop
+                    break
                 else:
-                    print("Not enough gold!")
-            elif shop_choice == "3":
-                # Leave shop
-                break
-            else:
-                print("Invalid choice.")
-elif choice == "3":
-    # Change area
-    print("Where do you want to go?")
-    for i, area in enumerate(areas.values()):
-        print(f"{i+1}. {area['name']}")
-    area_choice = int(input("Enter your choice: "))
-    current_area = list(areas.values())[area_choice-1]
-elif choice == "4":
-    # Quit
-    print("Goodbye!")
-    break
-else:
-    print("Invalid choice.")
+                    print("Invalid choice.")
+    elif choice == "3":
+        # Change area
+        print("Where do you want to go?")
+        for i, area in enumerate(areas.values()):
+            print(f"{i+1}. {area['name']}")
+        area_choice = int(input("Enter your choice: "))
+        current_area = list(areas.values())[area_choice-1]
+    elif choice == "4":
+        # Quit
+        print("Goodbye!")
+        break
+    else:
+        print("Invalid choice.")
