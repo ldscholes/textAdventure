@@ -27,6 +27,14 @@ troll = {
     "gold": 20
 }
 
+dragon = {
+    "name": "Dragon",
+    "health": 100,
+    "attack": 20,
+    "defense": 10,
+    "gold": 50
+}
+
 # Define areas and their properties
 areas = {
     "Village": {
@@ -42,7 +50,17 @@ areas = {
     "Cave": {
         "description": "You are in a dark cave with jagged walls and a damp floor.",
         "enemies": [troll],
-        "exits": ["Forest"]
+        "exits": ["Forest", "Dungeon"]
+    },
+    "Dungeon": {
+        "description": "You are in a massive dungeon with many twists and turns.",
+        "enemies": [goblin, troll, dragon],
+        "exits": ["Cave", "Castle"]
+    },
+    "Castle": {
+        "description": "You are in the throne room of a great castle.",
+        "enemies": [dragon],
+        "exits": ["Dungeon"]
     }
 }
 
@@ -59,13 +77,15 @@ def combat(player, enemy):
     print(f"A wild {enemy['name']} appears!")
     while player["health"] > 0 and enemy["health"] > 0:
         # Player attacks
-        print(f"You attack the {enemy['name']} for {player['attack']} damage!")
-        enemy["health"] -= player["attack"]
+        damage = max(0, player["attack"] - enemy["defense"])
+        print(f"You attack the {enemy['name']} for {damage} damage!")
+        enemy["health"] -= damage
         if enemy["health"] <= 0:
             break
         # Enemy attacks
-        print(f"The {enemy['name']} attacks you for {enemy['attack']} damage!")
-        player["health"] -= enemy["attack"]
+        damage = max(0, enemy["attack"] - player["defense"])
+        print(f"The {enemy['name']} attacks you for {damage} damage!")
+        player["health"] -= damage
         if player["health"] <= 0:
             break
     if player["health"] > 0:
@@ -85,18 +105,4 @@ player["name"] = input("> ")
 while True:
     # Print the current area's description
     print(f"\n{player['name']}, you have {player['health']} health and {player['gold']} gold.")
-    print(areas[player['area']]["description"])
-    print("What would you like to do?")
-    # Print the available exits for the current area
-    for exit in areas[player['area']]["exits"]:
-        print(f"{exit}")
-    # Print the available actions for the current area
-    print("1. Fight enemies")
-    print("2. Quit")
-    choice = get_input(["1", "2"] + areas[player['area']]["exits"])
-    if choice == "1":
-        # Start combat with a random enemy in the current area
-        if areas[player['area']]["enemies"]:
-            enemy = random.choice(areas[player['area']]["enemies"])
-            if combat(player, enemy):
-                # Player won the battle, heal
+    print(areas[player['
