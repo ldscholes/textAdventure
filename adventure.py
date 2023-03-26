@@ -6,7 +6,8 @@ player = {
     "health": 100,
     "attack": 10,
     "defense": 5,
-    "gold": 0
+    "gold": 0,
+    "area": "Village"
 }
 
 # Define enemy attributes
@@ -16,6 +17,33 @@ goblin = {
     "attack": 5,
     "defense": 2,
     "gold": 10
+}
+
+troll = {
+    "name": "Troll",
+    "health": 50,
+    "attack": 10,
+    "defense": 5,
+    "gold": 20
+}
+
+# Define areas and their properties
+areas = {
+    "Village": {
+        "description": "You are in a small village with a few shops and houses.",
+        "enemies": [],
+        "exits": ["Forest"]
+    },
+    "Forest": {
+        "description": "You are in a dense forest with tall trees and thick underbrush.",
+        "enemies": [goblin],
+        "exits": ["Village", "Cave"]
+    },
+    "Cave": {
+        "description": "You are in a dark cave with jagged walls and a damp floor.",
+        "enemies": [troll],
+        "exits": ["Forest"]
+    }
 }
 
 # Define game functions
@@ -55,17 +83,20 @@ player["name"] = input("> ")
 
 # Main game loop
 while True:
+    # Print the current area's description
     print(f"\n{player['name']}, you have {player['health']} health and {player['gold']} gold.")
+    print(areas[player['area']]["description"])
     print("What would you like to do?")
-    print("1. Fight a goblin")
+    # Print the available exits for the current area
+    for exit in areas[player['area']]["exits"]:
+        print(f"{exit}")
+    # Print the available actions for the current area
+    print("1. Fight enemies")
     print("2. Quit")
-    choice = get_input(["1", "2"])
+    choice = get_input(["1", "2"] + areas[player['area']]["exits"])
     if choice == "1":
-        # Start combat with a goblin
-        if combat(player, goblin):
-            # Player won the battle, heal the player
-            player["health"] = min(player["health"] + 10, 100)
-    else:
-        # Quit the game
-        print("Thanks for playing!")
-        break
+        # Start combat with a random enemy in the current area
+        if areas[player['area']]["enemies"]:
+            enemy = random.choice(areas[player['area']]["enemies"])
+            if combat(player, enemy):
+                # Player won the battle, heal
