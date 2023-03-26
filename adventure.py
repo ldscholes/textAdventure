@@ -3,11 +3,16 @@ import random
 # Player information
 player = {
     "name": "",
-    "health": 100,
+    "hp": 100,
+    "max_hp": 100,
     "mana": 50,
+    "max_mana": 50,
     "attack": 10,
     "defense": 5,
     "gold": 0,
+    "level": 1,
+    "xp": 0,
+    "next_level_xp": 100,
     "spells": [
         {"name": "Fireball", "damage": 20, "mana": 10},
         {"name": "Ice Bolt", "damage": 15, "mana": 5},
@@ -28,7 +33,7 @@ areas = {
                 {"name": "Mace", "attack": 15, "price": 150}
             ],
             "spells": [
-                {"name": "Heal", "mana": 10, "health": 20, "price": 100},
+                {"name": "Heal", "mana": 10, "hp": 20, "price": 100},
                 {"name": "Shield", "mana": 20, "defense": 5, "price": 200},
                 {"name": "Fireball", "mana": 30, "damage": 25, "price": 300}
             ]
@@ -38,8 +43,8 @@ areas = {
         "name": "Forest",
         "description": "You are in a dark forest. It's hard to see anything.",
         "enemies": [
-            {"name": "Goblin", "health": 20, "attack": 8, "defense": 2, "gold": 30},
-            {"name": "Wolf", "health": 15, "attack": 10, "defense": 3, "gold": 20}
+            {"name": "Goblin", "hp": 20, "attack": 8, "defense": 2, "gold": 30},
+            {"name": "Wolf", "hp": 15, "attack": 10, "defense": 3, "gold": 20}
         ],
         "shop": None
     },
@@ -47,12 +52,26 @@ areas = {
         "name": "Cave",
         "description": "You are in a deep cave. It's damp and eerie.",
         "enemies": [
-            {"name": "Orc", "health": 30, "attack": 12, "defense": 5, "gold": 50},
-            {"name": "Troll", "health": 40, "attack": 15, "defense": 8, "gold": 80}
+            {"name": "Orc", "hp": 30, "attack": 12, "defense": 5, "gold": 50},
+            {"name": "Troll", "hp": 40, "attack": 15, "defense": 8, "gold": 80}
         ],
         "shop": None
     }
 }
+
+def level_up(player):
+    print("Level up!")
+    player["level"] += 1
+    player["xp"] -= player["next_level_xp"]
+    player["next_level_xp"] *= 2
+    player["max_hp"] += 10
+    player["hp"] = player["max_hp"]
+    player["max_mana"] += 5
+    player["mana"] = player["max_mana"]
+    player["attack"] += 5
+    player["defense"] += 2
+    print(f"You are now level {player['level']}!")
+    print(f"You need {player['next_level_xp']} XP to reach the next level.")
 
 # Define game functions
 def get_input(choices):
@@ -63,62 +82,57 @@ def get_input(choices):
         else:
             print("Invalid choice.")
 
-def combat(enemy):
-    print(f"A {enemy['name']} appears!")
-    while player["health"] > 0 and enemy["health"] > 0:
-        # Player's turn
-        print("Your turn:")
+def combat(player, enemy):
+    print(f"A wild {enemy['name']} appeared!")
+    while player["hp"] > 0 and enemy["hp"] > 0:
+        print(f"Player HP: {player['hp']}")
+        print(f"Enemy HP: {enemy['hp']}")
+        print("What do you want to do?")
         print("1. Attack")
-        print("2. Use magic spell")
-        choice = input("Enter your choice: ")
+        if len(player["spells"]) > 0:
+            print("2. Cast spell")
+        choice = input("> ")
         if choice == "1":
             damage = player["attack"] - enemy["defense"]
             if damage < 0:
                 damage = 0
-            enemy["health"] -= damage
-            print(f"You hit the {enemy['name']} for {damage} damage.")
-        elif choice == "2":
-            print("Choose a spell to cast:")
+            enemy["hp"] -= damage
+            print(f"You dealt {damage} damage to the {enemy['name']}!")
+        elif choice == "2" and len(player["spells"]) > 0:
+            print("Which spell do you want to cast?")
             for i, spell in enumerate(player["spells"]):
-                print(f"{i+1}. {spell['name']}")
-            spell_choice = int(input("Enter your choice: "))
+                print(f"{i+1}. {spell['name']} ({spell['mana_cost']} mana)")
+            spell_choice = int(input("> "))
             spell = player["spells"][spell_choice-1]
-            if player["mana"] >= spell["mana"]:
-                player["mana"] -= spell["mana"]
-                if "health" in spell:
-                    player["health"] += spell["health"]
-                    if player["health"] > 100:
-                        player["health"] = 100
-                    print(f"You cast {spell['name']} and heal {spell['health']} health.")
-                elif "defense" in spell:
-                    player["defense"] += spell["defense"]
-                    print(f"You cast {spell['name']} and increase your defense by {spell['defense']}.")
-                elif "damage" in spell:
-                    damage = spell["damage"] - enemy["defense"]
-                    if damage < 0:
-                        damage = 0
-                    enemy["health"] -= damage
-                    print(f"You cast {spell['name']} and hit the {enemy['name']} for {damage} damage.")
-            else:
+            if player["mana"] < spell["mana_cost"]:
                 print("Not enough mana!")
+                continue
+            player["mana"] -= spell["mana_cost"]
+            damage = spell["damage"]
+            enemy["hp"] -= damage
+            print(f"You cast {spell['name']} and dealt {damage} damage to the {enemy['name']}!")
         else:
             print("Invalid choice!")
-        
-        if enemy["health"] <= 0:
+            continue
+        if enemy["hp"] <= 0:
             print(f"You defeated the {enemy['name']}!")
-            player["gold"] += enemy["gold"]
+            xp_reward = enemy["defense"] * 10
+            print(f"You gained {xp_reward} XP!")
+            player["xp"] += xp_reward
+            if player["xp"] >= player["next_level_xp"]:
+                level_up(player)
             return True
-        
-        # Enemy's turn
         damage = enemy["attack"] - player["defense"]
         if damage < 0:
             damage = 0
-        player["health"] -= damage
-        print(f"The {enemy['name']} hit you for {damage} damage.")
-        
-        if player["health"] <= 0:
-            print("You are defeated!")
-            return False
+        player["hp"] -= damage
+        print(f"The {enemy['name']} attacked you and dealt {damage} damage!")
+    if player["hp"] <= 0:
+        print("You died!")
+        player["gold"] = 0
+        player["hp"] = player["max_hp"]
+        player["mana"] = player["max_mana"]
+        return False
 
 # Start the game
 print("Welcome to the adventure game!")
@@ -134,18 +148,9 @@ print("You can explore the town, go to the forest or the cave, or visit the shop
 
 # Main game loop
 while True:
-    # Display player status
-    print(f"Name: {player['name']}")
-    print(f"Health: {player['health']}")
-    print(f"Mana: {player['mana']}")
-    print(f"Attack: {player['attack']}")
-    print(f"Defense: {player['defense']}")
-    print(f"Gold: {player['gold']}")
-    print()
-
-    # Display area description
+    print(f"\n--- {player['name']}, level {player['level']} ({player['xp']}/{player['next_level_xp']} XP) ---")
+    print(f"HP: {player['hp']}/{player['max_hp']}   Mana: {player['mana']}/{player['max_mana']}   Gold: {player['gold']}")
     print(current_area["description"])
-    print()
 
     # Display options
     print("What do you want to do?")
@@ -160,7 +165,7 @@ while True:
         if len(current_area["enemies"]) > 0:
             # Combat
             enemy = random.choice(current_area["enemies"])
-            if combat(enemy):
+            if combat(player,enemy):
                 # Player wins
                 print(f"You found {enemy['gold']} gold!")
                 player["gold"] += enemy["gold"]
