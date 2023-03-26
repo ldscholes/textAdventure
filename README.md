@@ -7,6 +7,8 @@ When the player chooses to visit the shop, the loop first checks if the current 
 
 When the player chooses to change areas, the loop displays a list of all available areas and allows the player to choose one.
 
+The game also has a leveling and experience point system. As the player gains experience points by defeating enemies, they will level up and become stronger, with their maximum health and mana increasing and their attack and defense stats improving. The player can also learn new spells as they level up.
+
 Finally, when the player chooses to quit, the loop breaks and the game ends.
 
 Overall, this main game loop ties together all the different functions and mechanics of the game, allowing the player to explore different areas, engage in combat, buy items, and progress through the game.
